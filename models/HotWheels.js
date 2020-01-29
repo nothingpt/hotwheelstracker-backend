@@ -16,6 +16,7 @@ const hotwheelSchema = new Schema({
     default: true
   }
 });
+
 const Hotwheel = mongoose.model('hotwheel', hotwheelSchema);
 
 module.exports = Hotwheel;

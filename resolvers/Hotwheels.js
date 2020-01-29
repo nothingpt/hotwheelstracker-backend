@@ -1,6 +1,10 @@
 // resolvers\Hotwheels.js
-const mongoose = require('mongoose');
-const Hotwheel = require('../models/Hotwheels');
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+const Hotwheel = require("../models/Hotwheels");
+const User = require("../models/User");
 
 const resolvers = {
   Query: {
@@ -30,7 +34,11 @@ const resolvers = {
     editHotwheel: async (parent, args) => {
       const { _id } = args;
 
-      const updt = await Hotwheel.findByIdAndUpdate(_id,  { $set: args }, { new: true});
+      const updt = await Hotwheel.findByIdAndUpdate(
+        _id,
+        { $set: args },
+        { new: true }
+      );
 
       return updt;
     },
@@ -38,11 +46,44 @@ const resolvers = {
       const { _id } = args;
 
       const oldHw = await Hotwheel.findById(_id);
-      oldHw.active = ! oldHw.active;
+      oldHw.active = !oldHw.active;
 
-      const updated = await Hotwheel.findByIdAndUpdate(_id, oldHw, { new: true });
+      const updated = await Hotwheel.findByIdAndUpdate(_id, oldHw, {
+        new: true
+      });
 
       return updated;
+    },
+    register: async (parent, { username, password }, ctx, info) => {
+      const user = await new User({ username, password }).save();
+
+      return user;
+    },
+    login: async (parent, { username, password }, ctx, info) => {
+      const user = await User.findOne({ username });
+
+      if (!user) {
+        throw new Error("Invalid Login");
+      }
+
+      const passwordMatch = await bcrypt.compare(password, user.password);
+
+      if (!passwordMatch) {
+        throw new Error("Invalid Login");
+      }
+
+      // 3. generate the JWT Token
+      const token = jwt.sign({ userId: user._id }, process.env.SECRET);
+      // 4. Set the cookie with the token
+      ctx.response.cookie("token", token, {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 365
+      });
+
+      return {
+        token,
+        user
+      };
     }
   }
 };
