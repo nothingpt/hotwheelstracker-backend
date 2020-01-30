@@ -12,6 +12,7 @@ const db = require('./db');
 function createServer () {
   // Server 
   return new GraphQLServer({
+    debug: true,
     typeDefs,
     resolvers,
     context: req => ({

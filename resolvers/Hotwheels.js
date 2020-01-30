@@ -16,7 +16,13 @@ const resolvers = {
     }
   },
   Mutation: {
-    createHotwheel: async (parent, args) => {
+    createHotwheel: async (parent, args, ctx) => {
+      if ( ctx.request.userId ) {
+        console.log(ctx.request.userId);
+      } else {
+        throw new Error('You must be logged in to add HotWheels!');
+      }
+
       const { model, colors, description } = args;
 
       const newHotwheel = new Hotwheel({
@@ -84,6 +90,10 @@ const resolvers = {
         token,
         user
       };
+    },
+    logout: async (parent, args, ctx, info) => {
+      ctx.response.clearCookie('token');
+      return { message: 'Bye'};
     }
   }
 };

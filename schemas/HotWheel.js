@@ -14,6 +14,10 @@ const typeDefs = `
     password: String
   }
 
+  type SuccessMessage {
+    message: String
+  }
+
   type LoginResponse {
     token: String
     user: UserObject
@@ -31,6 +35,7 @@ const typeDefs = `
     changeActive(_id: ID!): HotwheelObject
     register(username: String!, password: String!): UserObject!
     login(username: String!, password: String!): LoginResponse!
+    logout: SuccessMessage
   }
 `;
 

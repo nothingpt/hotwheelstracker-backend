@@ -2,6 +2,7 @@
 // imports
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
 
 const User = require('./models/User');
 
@@ -11,34 +12,28 @@ const createServer = require('./createServer');
 
 const server = createServer();
 
+// server.express.use(bodyParser.urlencoded({ extended: true}));
+// server.express.use(bodyParser.json());
+
 server.express.use(cookieParser());
 
 server.express.use((req, res, next) => {
   const { token } = req.cookies;
-  
-  if (token) {
-    console.log(`token: ${token}`);
-    const { userId } = jwt.verify(token, process.env.SECRET);
 
+  if (token) {
+    const { userId } = jwt.verify(token, process.env.SECRET);
     req.userId = userId;
   }
 
   next();
 });
 
-server.express.use(async (req, res, next) => {
-  if (!req.userId) {
-    next();
-  }
-
-  next();
-})
-
 // start the server
-server.start({ 
+server.start({
   cors: {
-    credentials: true
-  },  
+    credentials: true,
+    origin: 'http://localhost:3000'
+  },
   port: process.env.PORT || 7777 }, () =>
   console.log(`The server is running on port 7777`)
 );
